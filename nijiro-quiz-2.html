@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>にじいろクイズ！〜アライ診断〜</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;900&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'M PLUS Rounded 1c',sans-serif;background:#FDFCF0;color:#1A1A1A;min-height:100vh;overflow-x:hidden;}
+
+/* Rainbow top bar */
+.rainbow-bar{position:fixed;top:0;left:0;width:100%;height:6px;display:flex;z-index:100;}
+.rb{flex:1;}
+.rb1{background:#FF0000;}.rb2{background:#FF8E00;}.rb3{background:#FFEF00;}.rb4{background:#008121;}.rb5{background:#004CFF;}.rb6{background:#760089;}
+
+/* BG decorations */
+.bg-deco-heart{position:fixed;bottom:-2rem;right:-2rem;font-size:12rem;opacity:0.07;pointer-events:none;transform:rotate(12deg);}
+.bg-deco-star{position:fixed;top:-2rem;left:-2rem;font-size:8rem;opacity:0.07;pointer-events:none;transform:rotate(-12deg);}
+
+main{max-width:640px;margin:0 auto;padding:4rem 1.2rem 2rem;min-height:100vh;display:flex;flex-direction:column;}
+
+/* ===== START SCREEN ===== */
+#screen-start{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:2.5rem;}
+.hero-emoji{font-size:7rem;display:inline-block;animation:bounceRotate 5s infinite;}
+@keyframes bounceRotate{0%,100%{transform:scale(1) rotate(0deg);}25%{transform:scale(1.08) rotate(4deg);}75%{transform:scale(1.08) rotate(-4deg);};}
+.title-main{font-size:clamp(2.4rem,8vw,3.8rem);font-weight:900;background:linear-gradient(90deg,#FF0000,#FF8E00,#FFEF00,#008121,#004CFF,#760089);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.1;}
+.title-sub{font-size:clamp(1.1rem,4vw,1.4rem);color:#555;font-weight:700;margin-top:.4rem;}
+.title-desc{font-size:1rem;color:#888;font-weight:700;line-height:1.7;}
+
+.level-cards{display:flex;flex-direction:column;gap:1rem;width:100%;}
+.level-btn{border:none;cursor:pointer;padding:1.5rem 2rem;border-radius:1.8rem;font-family:'M PLUS Rounded 1c',sans-serif;font-weight:900;font-size:1.15rem;display:flex;align-items:center;gap:1rem;transition:transform .15s,box-shadow .15s;position:relative;overflow:hidden;}
+.level-btn:hover{transform:translateY(-3px);}
+.level-btn:active{transform:scale(.97);}
+.level-btn-easy{background:linear-gradient(135deg,#a8edea,#fed6e3);color:#333;box-shadow:0 6px 24px rgba(168,237,234,.5);}
+.level-btn-medium{background:linear-gradient(135deg,#ffecd2,#fcb69f);color:#333;box-shadow:0 6px 24px rgba(252,182,159,.5);}
+.level-btn-hard{background:linear-gradient(135deg,#a18cd1,#fbc2eb);color:#333;box-shadow:0 6px 24px rgba(161,140,209,.5);}
+.level-emoji{font-size:2.2rem;}
+.level-info{text-align:left;}
+.level-name{font-size:1.2rem;font-weight:900;}
+.level-desc{font-size:.85rem;font-weight:700;opacity:.7;margin-top:.15rem;}
+
+/* ===== QUIZ SCREEN ===== */
+#screen-quiz{display:none;flex-direction:column;gap:1.5rem;padding-top:1rem;}
+.quiz-header{display:flex;justify-content:space-between;align-items:center;}
+.level-badge{padding:.3rem 1rem;border-radius:999px;font-weight:900;font-size:.85rem;color:#fff;}
+.badge-easy{background:linear-gradient(90deg,#a8edea,#5bc8c0);color:#1a1a1a;}
+.badge-medium{background:linear-gradient(90deg,#fcb69f,#e88168);}
+.badge-hard{background:linear-gradient(90deg,#a18cd1,#8a6cc4);}
+.progress-text{font-size:.9rem;font-weight:900;color:#aaa;}
+.score-badge{display:flex;align-items:center;gap:.3rem;font-size:1.2rem;font-weight:900;color:#f59e0b;}
+
+.progress-bar-wrap{height:1rem;background:#e5e7eb;border-radius:999px;overflow:hidden;border:2px solid #fff;box-shadow:inset 0 2px 4px rgba(0,0,0,.1);}
+.progress-bar{height:100%;background:linear-gradient(90deg,#FF0000,#FF8E00,#FFEF00,#008121,#004CFF,#760089);border-radius:999px;transition:width .5s cubic-bezier(.4,0,.2,1);}
+
+.question-card{background:#fff;border-radius:2.2rem;padding:2.2rem;box-shadow:0 8px 40px rgba(0,0,0,.08);border:3px solid #f3f3f3;position:relative;overflow:hidden;}
+.question-card::before{content:'';position:absolute;top:0;left:0;width:.7rem;height:100%;background:linear-gradient(180deg,#FF0000,#FF8E00,#FFEF00,#008121,#004CFF,#760089);}
+.question-text{font-size:clamp(1.1rem,4vw,1.4rem);font-weight:900;color:#1a1a1a;line-height:1.5;padding-left:.5rem;}
+
+.options{display:flex;flex-direction:column;gap:.85rem;margin-top:1.5rem;}
+.option-btn{border:3px solid #f0f0f0;background:#fff;border-radius:1.4rem;padding:1.1rem 1.5rem;font-family:'M PLUS Rounded 1c',sans-serif;font-weight:900;font-size:1rem;cursor:pointer;text-align:left;display:flex;align-items:center;justify-content:space-between;transition:all .15s;width:100%;}
+.option-btn:not(.answered):hover{border-color:#60a5fa;background:#eff6ff;box-shadow:0 4px 16px rgba(96,165,250,.2);}
+.option-btn:not(.answered):active{transform:scale(.98);}
+.option-btn.correct{border-color:#22c55e;background:#f0fdf4;color:#14532d;box-shadow:0 0 20px rgba(34,197,94,.2);}
+.option-btn.wrong{border-color:#ef4444;background:#fef2f2;color:#7f1d1d;}
+.option-btn.dim{border-color:#f9fafb;opacity:.4;}
+.option-btn:disabled{cursor:default;}
+.option-icon{font-size:1.4rem;flex-shrink:0;}
+
+.explanation-card{background:#fff;border:3px solid #bfdbfe;border-radius:2rem;padding:1.8rem;display:flex;flex-direction:column;gap:1rem;box-shadow:0 4px 20px rgba(96,165,250,.12);animation:fadeSlide .3s ease;}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+.explanation-inner{display:flex;gap:.9rem;align-items:flex-start;}
+.info-icon{background:#dbeafe;border-radius:.8rem;padding:.5rem;font-size:1.4rem;flex-shrink:0;}
+.explanation-label{font-weight:900;color:#1e40af;margin-bottom:.2rem;}
+.explanation-text{font-weight:700;color:#374151;line-height:1.65;}
+.next-btn{background:#2563eb;color:#fff;border:none;border-radius:1.5rem;padding:1.2rem;font-family:'M PLUS Rounded 1c',sans-serif;font-weight:900;font-size:1.15rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem;transition:all .15s;box-shadow:0 6px 20px rgba(37,99,235,.3);}
+.next-btn:hover{background:#1d4ed8;transform:translateY(-2px);}
+.next-btn:active{transform:scale(.97);}
+
+/* ===== RESULT SCREEN ===== */
+#screen-result{display:none;flex-direction:column;align-items:center;text-align:center;gap:2rem;padding-top:1rem;}
+.result-hero{position:relative;font-size:8rem;line-height:1;animation:resultBounce 3s infinite;}
+@keyframes resultBounce{0%,100%{transform:scale(1) rotate(0deg);}33%{transform:scale(1.1) rotate(8deg);}66%{transform:scale(1.1) rotate(-8deg);};}
+.result-award{position:absolute;top:-1.5rem;right:-1.5rem;background:#facc15;border-radius:999px;padding:1rem;font-size:1.8rem;animation:pulse 1.5s infinite;border:4px solid #fff;box-shadow:0 4px 16px rgba(250,204,21,.5);}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.2);};}
+.ally-label{font-size:.9rem;font-weight:900;color:#9ca3af;letter-spacing:.3em;text-transform:uppercase;}
+.ally-name{font-size:clamp(1.8rem,6vw,2.8rem);font-weight:900;color:#111;}
+.score-pill{display:inline-block;background:linear-gradient(90deg,#f97316,#ec4899);color:#fff;border-radius:999px;padding:.5rem 2rem;font-size:1.4rem;font-weight:900;box-shadow:0 4px 16px rgba(249,115,22,.3);}
+.ally-desc{font-size:1rem;font-weight:700;color:#555;background:#fff;border-radius:1.5rem;padding:1rem 1.5rem;box-shadow:0 2px 12px rgba(0,0,0,.06);}
+
+.message-card{background:#fff;border-radius:2.5rem;padding:3rem 2.2rem 2rem;box-shadow:0 8px 40px rgba(0,0,0,.09);border:3px solid #f0f0f0;width:100%;position:relative;}
+.message-badge{position:absolute;top:-1rem;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:.35rem 1.5rem;border-radius:999px;font-size:.8rem;font-weight:900;letter-spacing:.15em;text-transform:uppercase;white-space:nowrap;}
+.message-text{font-size:1.05rem;font-weight:700;color:#1f2937;line-height:1.8;text-align:left;white-space:pre-wrap;}
+.loading-msg{display:flex;flex-direction:column;align-items:center;gap:1rem;padding:2rem 0;color:#9ca3af;font-weight:900;font-size:1rem;animation:textPulse 1.5s infinite;}
+@keyframes textPulse{0%,100%{opacity:1;}50%{opacity:.4;};}
+.spinner{width:2.5rem;height:2.5rem;border:4px solid #bfdbfe;border-top-color:#2563eb;border-radius:50%;animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);};}
+
+.gift-card{background:#fefce8;border:3px dashed #fbbf24;border-radius:2.2rem;padding:1.8rem 2rem;width:100%;display:flex;align-items:center;justify-content:space-between;gap:1.5rem;flex-wrap:wrap;}
+.gift-left{display:flex;align-items:center;gap:1.2rem;}
+.gift-icon-wrap{background:#facc15;border-radius:1.2rem;padding:1rem;font-size:2rem;transform:rotate(3deg);}
+.gift-title{font-size:1.3rem;font-weight:900;color:#111;}
+.gift-sub{font-size:.9rem;font-weight:700;color:#6b7280;margin-top:.15rem;}
+.ticket-num{background:#fff;border:3px solid #111;border-radius:.8rem;padding:.6rem 1.4rem;font-size:1.6rem;font-weight:900;box-shadow:4px 4px 0 #111;}
+
+.retry-btn{width:100%;background:#111;color:#fff;border:none;border-radius:2rem;padding:1.4rem;font-family:'M PLUS Rounded 1c',sans-serif;font-weight:900;font-size:1.3rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.6rem;transition:all .15s;box-shadow:0 8px 30px rgba(0,0,0,.2);}
+.retry-btn:hover{background:#000;transform:translateY(-3px);}
+.retry-btn:active{transform:scale(.97);}
+
+
+
+.hidden{display:none!important;}
+.screen{display:flex;}
+</style>
+</head>
+<body>
+
+<div class="rainbow-bar">
+  <div class="rb rb1"></div><div class="rb rb2"></div><div class="rb rb3"></div>
+  <div class="rb rb4"></div><div class="rb rb5"></div><div class="rb rb6"></div>
+</div>
+<div class="bg-deco-heart">💗</div>
+<div class="bg-deco-star">⭐</div>
+
+<main>
+
+<!-- ===== START ===== -->
+<div id="screen-start">
+  <div class="hero-emoji">🌈</div>
+  <div>
+    <div class="title-main">にじいろクイズ！</div>
+    <div class="title-sub">〜 アライ診断 〜</div>
+  </div>
+
+  <p class="title-desc">LGBTQ+を知って、<br>きみだけの「アライタイプ」を<br>チェックしよう！✨</p>
+
+  <div class="level-cards">
+    <button class="level-btn level-btn-easy" onclick="startQuiz('easy')">
+      <span class="level-emoji">🌱</span>
+      <div class="level-info">
+        <div class="level-name">やさしめコース</div>
+        <div class="level-desc">はじめての人もOK！基本から学ぼう</div>
+      </div>
+    </button>
+    <button class="level-btn level-btn-medium" onclick="startQuiz('medium')">
+      <span class="level-emoji">🔥</span>
+      <div class="level-info">
+        <div class="level-name">ガチめコース</div>
+        <div class="level-desc">もう少し深く知りたい人向け</div>
+      </div>
+    </button>
+    <button class="level-btn level-btn-hard" onclick="startQuiz('hard')">
+      <span class="level-emoji">👑</span>
+      <div class="level-info">
+        <div class="level-name">神レベルコース</div>
+        <div class="level-desc">本気のアライ志願者だけ来い！</div>
+      </div>
+    </button>
+  </div>
+</div>
+
+<!-- ===== QUIZ ===== -->
+<div id="screen-quiz" style="display:none;flex-direction:column;gap:1.5rem;padding-top:1rem;">
+  <div class="quiz-header">
+    <span id="level-badge" class="level-badge badge-easy">やさしめ</span>
+    <span class="progress-text"><span id="q-current">1</span> / 10</span>
+    <span class="score-badge">🏆 <span id="score-display">0</span></span>
+  </div>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-bar" id="progress-bar" style="width:10%;"></div>
+  </div>
+
+  <div class="question-card">
+    <p class="question-text" id="question-text"></p>
+    <div class="options" id="options-container"></div>
+  </div>
+
+  <div id="explanation-card" class="explanation-card hidden">
+    <div class="explanation-inner">
+      <div class="info-icon">💡</div>
+      <div>
+        <p class="explanation-label">知っトク！</p>
+        <p class="explanation-text" id="explanation-text"></p>
+      </div>
+    </div>
+    <button class="next-btn" id="next-btn" onclick="handleNext()">
+      <span id="next-btn-text">次いくよ！🚀</span>
+      <span>›</span>
+    </button>
+  </div>
+</div>
+
+<!-- ===== RESULT ===== -->
+<div id="screen-result" style="display:none;flex-direction:column;align-items:center;text-align:center;gap:2rem;padding-top:1rem;">
+  <div class="result-hero">
+    <span id="result-emoji"></span>
+    <div class="result-award">🏅</div>
+  </div>
+  <div class="ally-label">Your Ally Type</div>
+  <div class="ally-name" id="result-name"></div>
+  <div class="score-pill">SCORE: <span id="result-score"></span> / 10</div>
+  <div class="ally-desc" id="result-desc"></div>
+
+  <div class="message-card">
+    <div class="message-badge">Message for You</div>
+    <div id="result-message">
+      <div class="loading-msg">
+        <div class="spinner"></div>
+        <span>メッセージを準備中…</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="gift-card">
+    <div class="gift-left">
+      <div class="gift-icon-wrap">🎁</div>
+      <div>
+        <div class="gift-title">景品GETチャンス！</div>
+        <div class="gift-sub">この画面を担当者に見せてね！</div>
+      </div>
+    </div>
+    <div class="ticket-num" id="ticket-num"></div>
+  </div>
+
+  <button class="retry-btn" onclick="resetGame()">
+    ↺ もういっかい挑戦！✨
+  </button>
+</div>
+
+</main>
+
+<script>
+// ===== DATA =====
+const QUESTIONS = {
+  easy: [
+    {text:"「LGBT」の「L」は何の略？",options:["レズビアン","ライオン","レモン","ライト"],correct:0,explanation:"Lはレズビアン（女性を好きになる女性）の略です。"},
+    {text:"虹色の旗（レインボーフラッグ）は何を象徴している？",options:["天気","多様性（みんな違ってみんないい）","お菓子","スポーツ"],correct:1,explanation:"虹色は、いろいろな人がいる「多様性」をあらわしています。"},
+    {text:"「G」はゲイの略ですが、どんな意味？",options:["男性を好きになる男性","ゲームが好きな人","元気な人","外国の人"],correct:0,explanation:"Gはゲイ（男性を好きになる男性）の略です。"},
+    {text:"「B」はバイセクシュアルの略。どんな意味？",options:["自転車が好きな人","男性も女性も好きになる人","お弁当が好きな人","勉強が好きな人"],correct:1,explanation:"Bはバイセクシュアル（男性も女性も好きになる人）の略です。"},
+    {text:"「T」はトランスジェンダーの略。どんな意味？",options:["タクシーの運転手","体が丈夫な人","生まれた時の性と、自分の心が違う人","走るのが速い人"],correct:2,explanation:"Tはトランスジェンダー（生まれた時の性と、自分の心が違う人）の略です。"},
+    {text:"みんなが自分らしくいられるために大切なことは？",options:["みんな同じにすること","相手の気持ちを大切にすること","秘密にすること","我慢すること"],correct:1,explanation:"お互いの違いを認めて、思いやることが一番大切です。"},
+    {text:"LGBT以外にも、いろいろなセクシュアリティ（性のあり方）がある？",options:["ある","ない","わからない","5つだけ"],correct:0,explanation:"LGBT以外にも、たくさんの色のグラデーションのように、いろいろなあり方があります。"},
+    {text:"好きになる人は、自分で選べるもの？",options:["選べる","自然に決まるもの","親が決める","先生が決める"],correct:1,explanation:"誰を好きになるかは、自分の意志で選ぶものではなく、自然に湧き上がる感情です。"},
+    {text:"友達から「実はLGBTなんだ」と相談されたら、どうする？",options:["笑う","言いふらす","「話してくれてありがとう」と聞く","逃げる"],correct:2,explanation:"勇気を出して話してくれたことに感謝して、優しく寄り添いましょう。"},
+    {text:"「アライ（Ally）」ってどんな人のこと？",options:["洗い物をする人","LGBTを理解し、応援する人","歩くのが好きな人","新しいもの好きな人"],correct:1,explanation:"アライは、LGBTQ+の当事者ではないけれど、理解し応援する「味方」のことです。"}
+  ],
+  medium: [
+    {text:"「LGBTQ」の「Q」にはどんな意味が含まれる？",options:["クイーン","クエスチョニング（まだ決めていない・探している）","クイック","クオリティ"],correct:1,explanation:"Qはクエスチョニング（自分の性を決めていない、または探している状態）やクィアを指します。"},
+    {text:"トランスジェンダーの人が、心と体の性を一致させるために行うことがあるのは？",options:["ホルモン療法や手術","筋トレ","瞑想","読書"],correct:0,explanation:"人によりますが、ホルモン療法や性別適合手術を受ける人もいます。"},
+    {text:"自分の性のあり方を他人に伝えることを何と言う？",options:["カミングアウト","ログイン","サインアップ","アップデート"],correct:0,explanation:"カミングアウト（Coming Out）と言います。"},
+    {text:"本人の許可なく、その人の性のあり方を他人に暴露することを何と言う？",options:["アウティング","シェアリング","ポスト","リツイート"],correct:0,explanation:"アウティング（Outing）と言い、非常に危険でマナー違反な行為です。"},
+    {text:"「SOGI（ソギ）」の「S」は何の略？",options:["Sexual Orientation（性的指向：誰を好きになるか）","Social","Super","Special"],correct:0,explanation:"SOGIは「Sexual Orientation & Gender Identity」の略です。"},
+    {text:"同性同士のカップルに、結婚に準じた証明書を発行する自治体の制度は？",options:["パートナーシップ宣誓制度","結婚お祝い制度","友情証明制度","家族登録制度"],correct:0,explanation:"多くの自治体で「パートナーシップ宣誓制度」が導入されています。"},
+    {text:"「アセクシュアル」とはどんな人のこと？",options:["誰に対しても恋愛感情や性的欲求を抱かない人","汗をかきやすい人","朝が苦手な人","明るい人"],correct:0,explanation:"他者に対して性的欲求を抱かない、あるいは恋愛感情を抱かない人を指します。"},
+    {text:"ジェンダーアイデンティティ（性自認）とは何のこと？",options:["自分の性をどう認識しているか","好きな色","得意なこと","住んでいる場所"],correct:0,explanation:"自分が自分の性をどう思っているか、という心の性のことです。"},
+    {text:"「ノンバイナリー」とはどんな人？",options:["男性・女性という枠組みに当てはまらない人","数字が苦手な人","音楽が好きな人","一人暮らしの人"],correct:0,explanation:"自分の性を「男か女か」のどちらか一方だけに決めない、あるいはどちらでもないとするあり方です。"},
+    {text:"LGBTQ+のパレードが世界中で行われるのは、何への誇りを示すため？",options:["プライド","スピード","パワー","マネー"],correct:0,explanation:"「プライド（誇り）」を持って自分らしく生きることを祝福するイベントです。"}
+  ],
+  hard: [
+    {text:"1969年にニューヨークで起きた、LGBTQ+の権利運動のきっかけとなった事件は？",options:["ストーンウォールの反乱","ボストン茶会事件","ウォーターゲート事件","ベルリンの壁崩壊"],correct:0,explanation:"ストーンウォール・インというバーでの警察の立ち入りに対する抗議が、現代の運動の起点となりました。"},
+    {text:"「シスジェンダー」とはどんな人のこと？",options:["生まれた時の性と性自認が一致している人","静かな人","システムエンジニア","兄弟が多い人"],correct:0,explanation:"トランスジェンダーの対義語で、出生時の性と性自認が一致している人を指します。"},
+    {text:"「パンセクシュアル」とはどんな人のこと？",options:["相手の性別に関わらず、あらゆる人を好きになる人（全性愛）","パンが好きな人","パンダが好きな人","パニックになりやすい人"],correct:0,explanation:"相手の性別を条件とせず、人を好きになるあり方です。"},
+    {text:"「インターセクシュアル（DSDs）」とは何のこと？",options:["体の性の特徴が、一般的な男女の定義に当てはまらない状態","インターンシップ","国際的な人","交差点"],correct:0,explanation:"染色体や生殖器などが、典型的な男性・女性の構造とは異なる状態で生まれた人を指します。"},
+    {text:"「ヘテロノーマティビティ（異性愛規範）」とは？",options:["異性愛が当たり前で正しいとする社会の考え方","ヘリコプターの操縦","新しい法律","標準的な食事"],correct:0,explanation:"「人は異性を好きになるのが普通だ」という前提で社会が作られていることを指します。"},
+    {text:"「デミセクシュアル」とはどんな人のこと？",options:["強い情緒的な結びつきがある相手にのみ、性的欲求を抱く人","出口を探している人","派手な人","半分だけ好きな人"],correct:0,explanation:"深い信頼関係や絆ができて初めて、性的な惹かれを感じるあり方です。"},
+    {text:"「クィア（Queer）」という言葉の歴史的な背景は？",options:["もともとは「変な」という蔑称だったが、肯定的に再定義された","王室の言葉","料理の名前","鳥の鳴き声"],correct:0,explanation:"かつては差別用語でしたが、現在は当事者たちが誇りを持って使う言葉に変わりました。"},
+    {text:"「ジェンダー・フルイド」とはどんな状態？",options:["性自認が流動的に変化すること","ジェンダーが固まっていること","フルートを吹くこと","果物が好きなこと"],correct:0,explanation:"自分の性が、ある時は男性、ある時は女性、ある時はどちらでもない、と変化するあり方です。"},
+    {text:"「マイクロアグレッション」とは？",options:["無意識の偏見による、日常的な小さな攻撃や差別","小さな計算機","顕微鏡","激しい怒り"],correct:0,explanation:"悪気はなくても、相手を傷つけるような些細な言動や態度のことです。"},
+    {text:"「アロマンティック」とはどんな人のこと？",options:["他者に恋愛感情を抱かない人","アロマが好きな人","ロマンチックな人","歩くのが速い人"],correct:0,explanation:"他者に対して恋愛感情を抱かないあり方を指します。"}
+  ]
+};
+
+// Child-friendly text overrides for easy level
+const QUESTIONS_CHILD = {
+  easy: [
+    {text:"「LGBT」の「L」は何の略かな？",options:["レズビアン（女の子が女の子を好きになること）","ライオン","レモン","ライト"],correct:0,explanation:"Lはレズビアンの略。女の子が女の子を好きになること、それも素敵な気持ちだよ！"},
+    {text:"にじ色の旗（レインボーフラッグ）は何をあらわしているかな？",options:["天気","みんな違ってみんないい（多様性）","お菓子","スポーツ"],correct:1,explanation:"にじ色は、世界中のいろんな人たちをあらわしているよ。みんな違っていいんだね！"},
+    {text:"「G」はゲイの略だよ。どんな意味かな？",options:["男の子が男の子を好きになること","ゲームが好きな人","元気な人","外国の人"],correct:0,explanation:"Gはゲイの略。男の子が男の子を好きになること。気持ちは人それぞれだよ！"},
+    {text:"「B」はバイセクシュアルの略。どんな意味かな？",options:["自転車が好きな人","男の子も女の子も好きになる人","お弁当が好きな人","勉強が好きな人"],correct:1,explanation:"バイセクシュアルは、男の子も女の子も好きになる人のこと。いろんな好きがあるね！"},
+    {text:"「T」はトランスジェンダーの略。どんな意味かな？",options:["タクシーの運転手","体が丈夫な人","生まれた時の体と、心が違う人","走るのが速い人"],correct:2,explanation:"生まれた時の体と、心の中の自分が違うと感じる人のこと。その気持ちを大切にしてね。"},
+    {text:"みんなが自分らしくいられるために、一番大切なことは？",options:["みんな同じにすること","相手の気持ちを大切にすること","秘密にすること","我慢すること"],correct:1,explanation:"違いを認めて、思いやる気持ちが一番大切！あなたならできるよ。"},
+    {text:"LGBT以外にも、いろんな「好き」や「性のあり方」があるのかな？",options:["ある！","ない","わからない","5つだけ"],correct:0,explanation:"にじ色みたいにたくさんの色があるように、いろんなあり方があるよ。みんな違って素敵！"},
+    {text:"好きになる人って、自分で選べるもの？",options:["選べる","自然に決まるもの","親が決める","先生が決める"],correct:1,explanation:"誰かを好きになる気持ちは、自然に湧いてくるもの。自分でコントロールできないんだよ。"},
+    {text:"友達に「実はLGBTなんだ」と相談されたら、どうする？",options:["笑う","みんなに話す","「話してくれてありがとう」と聞く","逃げる"],correct:2,explanation:"勇気を出して話してくれた友達に、「ありがとう」って伝えよう。それだけで大きな力になるよ！"},
+    {text:"「アライ（Ally）」ってどんな人かな？",options:["洗い物をする人","LGBTの人を理解して、応援する人","歩くのが好きな人","新しいもの好きな人"],correct:1,explanation:"アライは「味方」という意味。あなたも今日からアライになれるよ！🌈"}
+  ]
+};
+
+const ALLY_TYPES = [
+  {range:[0,3],name:"ビギナー・アライ🔰",desc:"伸びしろしかない！これから最強のアライになれる原石✨",emoji:"🐣",comment:"まずは知ろうとしてくれたことが超エライ！🌈 これから少しずつアップデートしていけばOK。一緒に歩き出そう！\n\n最後に担当者のところに行って景品をGETしてね！🎁"},
+  {range:[4,7],name:"フレンドリー・アライ🤝",desc:"みんなの個性をリスペクトできる、エモい感性の持ち主！",emoji:"🦄",comment:"知識もついてきて、多様性の波に乗れてるね！🌊 友達が困ってたら、そっと寄り添える優しさを持ってるはず。\n\n最後に担当者のところに行って景品をGETしてね！🎁"},
+  {range:[8,9],name:"インフルエンス・アライ📣",desc:"周りをハッピーにする影響力バツグンのアライ！",emoji:"✨",comment:"すごすぎ！LGBTQ+のことを自分事として考えられてるね。君の発信や行動が、誰かの救いになるかも！\n\n最後に担当者のところに行って景品をGETしてね！🎁"},
+  {range:[10,10],name:"レジェンド・アライ👑",desc:"知識も愛もカンスト！全人類の味方、最強のリーダー！",emoji:"🌈",comment:"神レベル！パーフェクトだよ。多様性が当たり前の世界を作る、まさに時代の最先端。これからもみんなを引っ張ってね！\n\n最後に担当者のところに行って景品をGETしてね！🎁"}
+];
+
+// ===== STATE =====
+let currentLevel = 'easy';
+let questions = [];
+let currentIndex = 0;
+let score = 0;
+let answered = false;
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+function getQuestions(level) {
+  const pool = level === 'easy' ? QUESTIONS_CHILD.easy : QUESTIONS[level];
+  return shuffle(pool).map(q => {
+    const opts = q.options.map((t,i) => ({text:t,orig:i}));
+    return {...q, shuffled: shuffle(opts)};
+  });
+}
+
+function getAllyType(s) {
+  return ALLY_TYPES.find(t => s >= t.range[0] && s <= t.range[1]);
+}
+
+function startQuiz(level) {
+  currentLevel = level;
+  questions = getQuestions(level);
+  currentIndex = 0;
+  score = 0;
+  answered = false;
+
+  // Badge
+  const badge = document.getElementById('level-badge');
+  badge.className = 'level-badge ' + (level==='easy'?'badge-easy':level==='medium'?'badge-medium':'badge-hard');
+  badge.textContent = level==='easy'?'やさしめ':level==='medium'?'ガチめ':'神レベル';
+
+  showScreen('quiz');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = questions[currentIndex];
+  document.getElementById('q-current').textContent = currentIndex+1;
+  document.getElementById('score-display').textContent = score;
+  document.getElementById('progress-bar').style.width = ((currentIndex+1)/10*100)+'%';
+  document.getElementById('question-text').textContent = q.text;
+
+  const opts = document.getElementById('options-container');
+  opts.innerHTML = '';
+  q.shuffled.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span>${opt.text}</span><span class="option-icon"></span>`;
+    btn.onclick = () => selectOption(i);
+    opts.appendChild(btn);
+  });
+
+  document.getElementById('explanation-card').classList.add('hidden');
+  answered = false;
+}
+
+function selectOption(idx) {
+  if (answered) return;
+  answered = true;
+  const q = questions[currentIndex];
+  const isCorrect = q.shuffled[idx].orig === q.correct;
+  if (isCorrect) score++;
+
+  const btns = document.querySelectorAll('.option-btn');
+  btns.forEach((btn, i) => {
+    btn.disabled = true;
+    const isC = q.shuffled[i].orig === q.correct;
+    const icon = btn.querySelector('.option-icon');
+    if (isC) { btn.classList.add('correct'); icon.textContent = '✅'; }
+    else if (i === idx) { btn.classList.add('wrong'); icon.textContent = '❌'; }
+    else btn.classList.add('dim');
+  });
+
+  document.getElementById('score-display').textContent = score;
+  document.getElementById('explanation-text').textContent = q.explanation;
+  document.getElementById('next-btn-text').textContent = currentIndex === 9 ? '結果を見る！🔥' : '次いくよ！🚀';
+  document.getElementById('explanation-card').classList.remove('hidden');
+}
+
+function handleNext() {
+  if (currentIndex < 9) {
+    currentIndex++;
+    renderQuestion();
+  } else {
+    showResult();
+  }
+}
+
+function showResult() {
+  showScreen('result');
+  const ally = getAllyType(score);
+  document.getElementById('result-emoji').textContent = ally.emoji;
+  document.getElementById('result-name').textContent = ally.name;
+  document.getElementById('result-score').textContent = score;
+  document.getElementById('result-desc').textContent = ally.desc;
+  document.getElementById('ticket-num').textContent = '#' + (Math.floor(Math.random()*9000)+1000);
+
+  // Show message after brief delay
+  setTimeout(() => {
+    document.getElementById('result-message').innerHTML =
+      `<p class="message-text">${ally.comment}</p>`;
+  }, 800);
+}
+
+function resetGame() {
+  showScreen('start');
+}
+
+function showScreen(name) {
+  ['start','quiz','result'].forEach(s => {
+    const el = document.getElementById('screen-'+s);
+    el.style.display = s===name ? 'flex' : 'none';
+    el.style.flexDirection = s===name ? 'column' : '';
+  });
+}
+</script>
+</body>
+</html>
